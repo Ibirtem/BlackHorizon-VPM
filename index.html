@@ -7,11 +7,13 @@
     <title>BlackHorizon Systems</title>
     <style>
         :root {
-            --glass-bg: rgba(20, 20, 20, 0.6);
+            --glass-bg: rgba(20, 20, 20, 0.7);
             --glass-border: rgba(255, 255, 255, 0.15);
             --accent: #4da6ff;
+            --accent-hover: #3390ee;
             --text-main: #ffffff;
             --text-dim: #aaaaaa;
+            --btn-bg: rgba(255, 255, 255, 0.05);
         }
 
         body {
@@ -80,18 +82,37 @@
         .subtitle {
             color: var(--text-dim);
             margin-top: 10px;
+            margin-bottom: 30px;
             font-size: 1.2rem;
             font-weight: 300;
         }
 
+        .main-action-btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 15px 40px;
+            background: rgba(77, 166, 255, 0.15);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: 0.3s;
+            backdrop-filter: blur(4px);
+        }
+
+        .main-action-btn:hover {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 0 25px rgba(77, 166, 255, 0.6);
+            transform: scale(1.02);
+        }
+
         .repo-status {
-            margin-top: 20px;
+            margin-top: 25px;
             font-size: 0.9rem;
             color: var(--text-dim);
-            background: rgba(0, 0, 0, 0.3);
-            display: inline-block;
-            padding: 5px 15px;
-            border-radius: 20px;
         }
 
         .grid {
@@ -105,17 +126,15 @@
             border: 1px solid var(--glass-border);
             border-radius: 20px;
             padding: 30px;
-            transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+            transition: box-shadow 0.3s, border-color 0.3s;
             display: flex;
             flex-direction: column;
             position: relative;
-            overflow: hidden;
         }
 
         .card:hover {
-            transform: translateY(-5px);
             box-shadow: 0 15px 50px rgba(0, 0, 0, 0.6);
-            border-color: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.4);
         }
 
         .card-header {
@@ -133,14 +152,15 @@
         }
 
         .version-badge {
-            background: rgba(77, 166, 255, 0.15);
-            color: var(--accent);
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-dim);
             padding: 4px 10px;
             border-radius: 8px;
             font-size: 0.85rem;
             font-weight: 600;
             white-space: nowrap;
             margin-left: 10px;
+            border: 1px solid var(--glass-border);
         }
 
         .card-desc {
@@ -151,67 +171,47 @@
             font-size: 0.95rem;
         }
 
-        .btn-group {
+        .btn-row {
             display: flex;
-            gap: 10px;
-            flex-direction: column;
+            gap: 12px;
+            margin-top: auto;
         }
 
         .btn {
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 12px;
-            border-radius: 12px;
+            padding: 10px 16px;
+            border-radius: 10px;
             text-decoration: none;
-            font-weight: 600;
+            font-weight: 500;
             transition: 0.2s;
             cursor: pointer;
-            border: none;
-            font-size: 1rem;
-        }
-
-        .btn-primary {
-            background: var(--accent);
-            color: white;
-            box-shadow: 0 4px 15px rgba(77, 166, 255, 0.3);
-        }
-
-        .btn-primary:hover {
-            background: var(--accent-hover);
-            transform: scale(1.02);
-            box-shadow: 0 6px 20px rgba(77, 166, 255, 0.5);
-        }
-
-        .btn-row {
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn-secondary {
-            background: var(--btn-bg);
-            color: var(--text-dim);
-            border: 1px solid transparent;
             font-size: 0.9rem;
             flex: 1;
+            background: var(--btn-bg);
+            color: var(--text-dim);
+            border: 1px solid var(--glass-border);
         }
 
-        .btn-secondary:hover {
+        .btn:hover {
             background: rgba(255, 255, 255, 0.1);
             color: white;
-            border-color: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
         }
 
-        .icon-vcc::before {
-            content: "⚡ ";
+        .btn:active {
+            transform: translateY(1px);
         }
 
         .icon-zip::before {
             content: "⬇ ";
+            margin-right: 6px;
         }
 
         .icon-copy::before {
-            content: "📋 ";
+            content: "📄 ";
+            margin-right: 6px;
         }
     </style>
 </head>
@@ -224,6 +224,9 @@
         <header>
             <h1>Black Horizon</h1>
             <div class="subtitle">Modular Systems for VRChat</div>
+
+            <a href="#" id="connectBtn" class="main-action-btn">Connect to VCC</a>
+
             <div id="repo-status" class="repo-status">Loading repository...</div>
         </header>
 
@@ -240,7 +243,11 @@
                 const repoUrl = new URL('index.json', window.location.href).href;
                 const vccDeepLink = `vcc://vpm/addRepo?url=${encodeURIComponent(repoUrl)}`;
 
-                document.getElementById('repo-status').innerHTML = `Repository Active • ${Object.keys(data.packages).length} Packages`;
+                const connectBtn = document.getElementById('connectBtn');
+                connectBtn.href = vccDeepLink;
+                connectBtn.innerHTML = "Add to VCC";
+
+                document.getElementById('repo-status').innerHTML = `Repository Active • ${Object.keys(data.packages).length} Packages Available`;
 
                 const container = document.getElementById('package-list');
                 const packages = data.packages || {};
@@ -269,20 +276,14 @@
                             ${latest.description || 'No description provided.'}
                         </div>
 
-                        <div class="btn-group">
-                            <a href="${vccDeepLink}" class="btn btn-primary icon-vcc">
-                                Add to VCC
+                        <div class="btn-row">
+                            <a href="${latest.url}" class="btn icon-zip">
+                                Download Zip
                             </a>
-
-                            <div class="btn-row">
-                                <a href="${latest.url}" class="btn btn-secondary icon-zip">
-                                    Zip
-                                </a>
-                                
-                                <button class="btn btn-secondary icon-copy" onclick="copyId('${id}', this)">
-                                    Copy ID
-                                </button>
-                            </div>
+                            
+                            <button class="btn icon-copy" onclick="copyId('${id}', this)">
+                                Copy ID
+                            </button>
                         </div>
                     `;
                     container.appendChild(card);
@@ -290,10 +291,6 @@
             } catch (e) {
                 console.error("Error loading VPM data", e);
                 document.getElementById('repo-status').innerText = "System Offline (index.json missing)";
-                document.getElementById('package-list').innerHTML = `<div style="text-align:center; width:100%">
-                    <h3>Waiting for GitHub Actions...</h3>
-                    <p>If you just created this repo, wait ~2 minutes for the build to finish.</p>
-                </div>`;
             }
         }
 
@@ -301,9 +298,11 @@
             navigator.clipboard.writeText(text);
             const originalText = btn.innerHTML;
             btn.innerHTML = "Copied!";
+            btn.style.borderColor = "#4da6ff";
             btn.style.color = "#4da6ff";
             setTimeout(() => {
                 btn.innerHTML = originalText;
+                btn.style.borderColor = "";
                 btn.style.color = "";
             }, 1500);
         }
