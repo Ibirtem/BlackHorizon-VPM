@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlackHorizon Systems</title>
+    <style>
+        :root {
+            --glass-bg: rgba(20, 20, 20, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --accent: #4da6ff;
+            --text-main: #ffffff;
+            --text-dim: #aaaaaa;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #111;
+            background-image: url('https://assets.aylas.net/images/bg_minecraft_shaders.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
+            z-index: -1;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            padding: 40px 20px;
+            box-sizing: border-box;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+            padding: 40px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 3rem;
+            font-weight: 200;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            color: var(--text-dim);
+            margin-top: 10px;
+            font-size: 1.1rem;
+        }
+
+        .repo-add-btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: rgba(77, 166, 255, 0.2);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            transition: 0.3s;
+            backdrop-filter: blur(5px);
+        }
+
+        .repo-add-btn:hover {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 0 20px rgba(77, 166, 255, 0.6);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 25px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .card-version {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            margin-left: auto;
+            color: var(--accent);
+        }
+
+        .card-desc {
+            color: var(--text-dim);
+            line-height: 1.5;
+            flex-grow: 1;
+            margin-bottom: 20px;
+        }
+
+        .card-actions {
+            margin-top: auto;
+        }
+
+        .btn-copy {
+            background: transparent;
+            border: 1px solid var(--text-dim);
+            color: var(--text-dim);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.2s;
+        }
+
+        .btn-copy:hover {
+            border-color: white;
+            color: white;
+            background: rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="overlay"></div>
+
+    <div class="container">
+        <header>
+            <h1>BLACK HORIZON</h1>
+            <div class="subtitle">VRChat Systems & Tools</div>
+            <a href="#" id="addRepoBtn" class="repo-add-btn">Connect to VCC</a>
+        </header>
+
+        <div id="package-list" class="grid">
+        </div>
+    </div>
+
+    <script>
+        async function loadRepo() {
+            try {
+                const response = await fetch('index.json');
+                const data = await response.json();
+
+                const repoUrl = new URL('index.json', window.location.href).href;
+                document.getElementById('addRepoBtn').href = `vcc://vpm/addRepo?url=${encodeURIComponent(repoUrl)}`;
+
+                const container = document.getElementById('package-list');
+                const packages = data.packages || {};
+
+                for (const [id, pkgData] of Object.entries(packages)) {
+                    const versions = pkgData.versions || {};
+                    const latestVersionKey = Object.keys(versions).pop();
+                    const latest = versions[latestVersionKey];
+
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `
+                        <div class="card-header">
+                            <div class="card-title">${latest.displayName || id}</div>
+                            <div class="card-version">v${latest.version}</div>
+                        </div>
+                        <div class="card-desc">${latest.description || 'No description provided.'}</div>
+                        <div class="card-actions">
+                            <button class="btn-copy" onclick="navigator.clipboard.writeText('${id}')">Copy ID: ${id}</button>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                }
+            } catch (e) {
+                console.error("Error loading VPM data", e);
+                document.getElementById('package-list').innerHTML = `<div style="text-align:center; width:100%">Repository index not found yet.</div>`;
+            }
+        }
+
+        loadRepo();
+    </script>
+</body>
+
+</html>

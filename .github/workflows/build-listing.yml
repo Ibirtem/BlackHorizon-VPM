@@ -1,0 +1,46 @@
+name: Update VPM Listing
+
+on:
+  schedule:
+    - cron: '0 */4 * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  build-listing:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Listing Repo
+        uses: actions/checkout@v4
+
+      - name: Build VPM Index & Site
+        uses: anatawa12/vrc-get-vpm-listing-action@v0.2
+        with:
+          name: "BlackHorizon Systems"
+
+          description: "Just funny modular systems for VRChat worlds :3"
+          config-file: "vpm.json" 
+          
+          html-enabled: false
+
+      - name: Deploy to GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: index
+
+  deploy:
+    needs: build-listing
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

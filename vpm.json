@@ -1,0 +1,11 @@
+{
+  "name": "BlackHorizon Systems",
+  "id": "com.blackhorizon.vpm",
+  "author": "Ibirtem",
+  "url": "https://ibirtem.github.io/BlackHorizon-VPM/index.json",
+  "packages": {
+    "Horizon GUI": {
+      "url": "https://github.com/Ibirtem/Horizon-GUI"
+    }
+  }
+}
