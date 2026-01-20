@@ -22,12 +22,88 @@ jobs:
       - name: Save Custom Interface
         run: cp index.html saved_index.html
 
-      - name: Build VPM Listing
-        uses: pats-tats/create-vpm-listing-action@v1.2.1
+      - name: Setup Python
+        uses: actions/setup-python@v4
         with:
-          name: "BlackHorizon Systems"
-          description: "High-quality modular systems for VRChat worlds. Powered by UdonSharp."
-          config-file: "vpm.json"
+          python-version: "3.x"
+
+      - name: Generate VPM JSON
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 -c '
+          import json, os, requests, sys
+
+          # Настройки
+          VPM_PATH = "vpm.json"
+          INDEX_PATH = "index.json"
+          HEADERS = {"Authorization": f"token {os.environ["GITHUB_TOKEN"]}"}
+
+          try:
+              with open(VPM_PATH, "r") as f:
+                  config = json.load(f)
+
+              final_index = {
+                  "name": config.get("name"),
+                  "id": config.get("id"),
+                  "author": config.get("author"),
+                  "url": config.get("url"),
+                  "packages": {}
+              }
+
+              for pkg_id, pkg_info in config.get("packages", {}).items():
+                  repo_url = pkg_info["url"]
+                  # Парсим "https://github.com/User/Repo" -> "User", "Repo"
+                  parts = repo_url.strip("/").split("/")
+                  owner, repo = parts[-2], parts[-1]
+                  
+                  print(f"Processing {pkg_id} from {owner}/{repo}...")
+                  
+                  # Получаем релизы с GitHub API
+                  api_url = f"https://api.github.com/repos/{owner}/{repo}/releases"
+                  resp = requests.get(api_url, headers=HEADERS)
+                  if resp.status_code != 200:
+                      print(f"Error fetching releases for {pkg_id}: {resp.status_code}")
+                      continue
+                      
+                  releases = resp.json()
+                  pkg_versions = {}
+                  
+                  for release in releases:
+                      # Берем версию из тега (v0.1.0 -> 0.1.0)
+                      tag = release["tag_name"]
+                      version = tag.lstrip("v")
+                      
+                      # Ищем zip-файл. 
+                      # 1. Приоритет: Прикрепленный Asset
+                      # 2. Фолбек: Source Code Zip
+                      download_url = release["zipball_url"]
+                      
+                      if "assets" in release:
+                          for asset in release["assets"]:
+                              if asset["name"].endswith(".zip"):
+                                  download_url = asset["browser_download_url"]
+                                  break
+                      
+                      pkg_versions[version] = {
+                          "name": pkg_id, # VCC использует это для маппинга
+                          "displayName": f"{repo} {version}", # Красивое имя
+                          "version": version,
+                          "url": download_url,
+                          "description": release.get("body", "") or "No description provided."
+                      }
+                  
+                  final_index["packages"][pkg_id] = {"versions": pkg_versions}
+
+              with open(INDEX_PATH, "w") as f:
+                  json.dump(final_index, f, indent=2)
+                  
+              print("Successfully generated index.json")
+              
+          except Exception as e:
+              print(f"Script failed: {e}")
+              sys.exit(1)
+          '
 
       - name: Restore Custom Interface
         run: mv saved_index.html index.html

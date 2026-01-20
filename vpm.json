@@ -4,7 +4,7 @@
   "author": "Ibirtem",
   "url": "https://ibirtem.github.io/BlackHorizon-VPM/index.json",
   "packages": {
-    "Horizon GUI": {
+    "com.blackhorizon.horizongui": {
       "url": "https://github.com/Ibirtem/Horizon-GUI"
     }
   }
