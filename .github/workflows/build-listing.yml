@@ -27,6 +27,9 @@ jobs:
         with:
           python-version: "3.x"
 
+      - name: Install Dependencies
+        run: pip install requests
+
       - name: Generate VPM JSON
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
