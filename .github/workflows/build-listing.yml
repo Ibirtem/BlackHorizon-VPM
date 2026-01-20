@@ -2,7 +2,7 @@ name: Update VPM Listing
 
 on:
   schedule:
-    - cron: '0 */4 * * *'
+    - cron: "0 */4 * * *"
   workflow_dispatch:
   push:
     branches: [main]
@@ -19,20 +19,23 @@ jobs:
       - name: Checkout Listing Repo
         uses: actions/checkout@v4
 
-      - name: Build VPM Index & Site
-        uses: anatawa12/vrc-get-vpm-listing-action@v0.2
+      - name: Save Custom Interface
+        run: cp index.html saved_index.html
+
+      - name: Build VPM Listing
+        uses: pats-tats/create-vpm-listing-action@v1.2.1
         with:
           name: "BlackHorizon Systems"
+          description: "High-quality modular systems for VRChat worlds. Powered by UdonSharp."
+          config-file: "vpm.json"
 
-          description: "Just funny modular systems for VRChat worlds :3"
-          config-file: "vpm.json" 
-          
-          html-enabled: false
+      - name: Restore Custom Interface
+        run: mv saved_index.html index.html
 
       - name: Deploy to GitHub Pages
         uses: actions/upload-pages-artifact@v3
         with:
-          path: index
+          path: .
 
   deploy:
     needs: build-listing
