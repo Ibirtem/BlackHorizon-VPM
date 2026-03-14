@@ -6,6 +6,9 @@
   "packages": {
     "com.blackhorizon.horizongui": {
       "url": "https://github.com/Ibirtem/Horizon-GUI"
+    },
+    "com.blackhorizon.horizonweathertime": {
+      "url": "https://github.com/Ibirtem/Horizon-Weather-Time"
     }
   }
 }
